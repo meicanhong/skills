@@ -1,0 +1,4 @@
+interface:
+  display_name: "钉钉 OA 审批核查"
+  short_description: "直连钉钉企业应用，核查指定人员的 OA 字段与附件"
+  default_prompt: "使用 $dingtalk-approval-reviewer 只读核查指定人员的钉钉 OA，直接调用企业应用 API，说明能不能批、关键问题和建议，不要执行任何 OA 写操作。"

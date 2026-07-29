@@ -1,6 +1,7 @@
 # Local credentials and environment overrides
 .env
 .env.*
+credentials.env
 *.cnf
 *.pem
 *.key
