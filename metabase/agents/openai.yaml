@@ -1,0 +1,6 @@
+interface:
+  display_name: "Metabase"
+  short_description: "Query and inspect Metabase BI data"
+  default_prompt: "Use $metabase to inspect a Metabase card, dashboard, or read-only query result."
+policy:
+  allow_implicit_invocation: true

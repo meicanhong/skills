@@ -1,0 +1,23 @@
+[project]
+name = "starrocks-skill-connect"
+version = "0.1.0"
+description = "StarRocks connection helpers bundled with the Alibaba Cloud EMR StarRocks assistant skill."
+requires-python = ">=3.10"
+dependencies = [
+  "click>=8.0",
+  "pymysql>=1.1",
+  "sqlglot>=26.0",
+]
+
+[tool.setuptools]
+package-dir = {"" = "scripts"}
+
+[tool.setuptools.packages.find]
+where = ["scripts"]
+
+[project.scripts]
+sr-login = "sr_connect.cli:login_cmd"
+sr-logout = "sr_connect.cli:logout_cmd"
+sr-whoami = "sr_connect.cli:whoami_cmd"
+sr-doctor = "sr_connect.cli:doctor_cmd"
+srsql = "sr_connect.cli:srsql_cmd"
