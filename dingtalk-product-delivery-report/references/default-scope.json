@@ -1,0 +1,51 @@
+{
+  "operator_user_id": "17730196689374392",
+  "base_id": "gwva2dxOW4KEE5wyI7dkzG0P8bkz3BRL",
+  "sheet_id": "hERWDMS",
+  "department_name": "产品开发&供应链",
+  "include_subdepartments": false,
+  "excluded_user_names": ["王维"],
+  "known_users": [
+    {
+      "name": "杨亿云",
+      "user_id": "202408616226084634"
+    },
+    {
+      "name": "宋昊",
+      "user_id": "3106415426752607"
+    },
+    {
+      "name": "龙晓婷",
+      "user_id": "414845286140098781"
+    },
+    {
+      "name": "马自花",
+      "user_id": "17604931845134812"
+    },
+    {
+      "name": "曾婷",
+      "user_id": "17725025428187073"
+    },
+    {
+      "name": "陈晓翩",
+      "user_id": "211714582237816382"
+    }
+  ],
+  "project_profiles": [
+    {
+      "name": "新防晒",
+      "aliases": ["新防晒"],
+      "related_terms": ["防晒", "奥蓓斯", "缺料", "补货", "分批出货"]
+    },
+    {
+      "name": "新版特证美白霜",
+      "aliases": ["新版特证美白霜"],
+      "related_terms": ["美白霜", "蜜妆", "人体报告", "溯源拍摄"]
+    },
+    {
+      "name": "新版特证冻膜",
+      "aliases": ["新版特证冻膜"],
+      "related_terms": ["冻膜", "绵俪", "绵丽", "芭薇", "人体报告"]
+    }
+  ]
+}
