@@ -1,0 +1,4 @@
+interface:
+  display_name: "Seedance 视频生成"
+  short_description: "仅用 Seedance 2.0 Mini，人工确认后创建并下载视频"
+  default_prompt: "Use $seedance-video-generator with Seedance 2.0 Mini only. First write the final model_text, then prepare the request and show me the exact model_text and every parameter. Submit only after I explicitly approve it."

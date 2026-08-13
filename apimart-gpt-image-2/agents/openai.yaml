@@ -1,0 +1,4 @@
+interface:
+  display_name: "APIMart GPT-Image-2"
+  short_description: "通过 APIMart 低成本渠道生成并下载 GPT-Image-2 图片"
+  default_prompt: "使用 $apimart-gpt-image-2 根据我的提示词生成图片并下载结果。"

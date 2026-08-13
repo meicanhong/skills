@@ -5,11 +5,11 @@
 - 唯一生图提供方：`$apimart-gpt-image-2`。
 - 唯一模型：非官方 `gpt-image-2`。
 - 每个请求必须包含 `official_fallback=false`，禁止因上游不可用切到高价官方渠道。
-- 唯一客户端：`/Users/danny/.codex/skills/apimart-gpt-image-2/scripts/apimart_gpt_image_2.py`。
+- 唯一客户端：同一 Skills 根目录下的 `apimart-gpt-image-2/scripts/apimart_gpt_image_2.py`。
 - 密钥只由 APIMart Skill 根目录的 `.env` 提供；不得复制到本 Skill 的 `.env`，不得显示或记录。
 - 不调用系统 `imagegen`、Imagen、subagent 生图或其他图片模型作为 fallback。
 
-每次开始风格测试或正式分镜生图前，完整读取 `/Users/danny/.codex/skills/apimart-gpt-image-2/SKILL.md`，以其当前 API 参数、安全边界、轮询和下载规则为准。
+每次开始风格测试或正式分镜生图前，完整读取 [`../../apimart-gpt-image-2/SKILL.md`](../../apimart-gpt-image-2/SKILL.md)，以其当前 API 参数、安全边界、轮询和下载规则为准。执行命令前，将该依赖 Skill 的实际根目录解析为绝对路径 `APIMART_SKILL_ROOT`；不得假设用户名或固定的 `~/.codex` 路径。
 
 ## 前置条件
 
@@ -53,7 +53,7 @@ APIMart 生成会计费。风格测试和正式批次是两个独立确认门。
 先确认参考帧是独立图片而非接触表，并检查文件存在、格式和尺寸。然后运行不带本地 `--image` 的 dry-run 验证生成参数；本地参考图会在真实提交时由 `--image` 上传，dry-run 不上传文件。
 
 ```bash
-python3 /Users/danny/.codex/skills/apimart-gpt-image-2/scripts/apimart_gpt_image_2.py \
+python3 "$APIMART_SKILL_ROOT/scripts/apimart_gpt_image_2.py" \
   generate \
   --prompt "$FULL_PROMPT" \
   --size 9:16 \
@@ -69,7 +69,7 @@ python3 /Users/danny/.codex/skills/apimart-gpt-image-2/scripts/apimart_gpt_image
 用户批准后，只生成 1 张真实镜头测试图。每张参考帧各写一个 `--image`：
 
 ```bash
-python3 /Users/danny/.codex/skills/apimart-gpt-image-2/scripts/apimart_gpt_image_2.py \
+python3 "$APIMART_SKILL_ROOT/scripts/apimart_gpt_image_2.py" \
   --verbose generate \
   --prompt "$FULL_PROMPT" \
   --image "/absolute/path/to/main-reference.png" \

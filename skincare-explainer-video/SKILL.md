@@ -35,7 +35,7 @@ Fun-ASR 缺少配置或调用失败时必须停止并报告，不得切换到本
 
 ### 3. 风格测试与分镜图片
 
-读取并严格执行 [APIMart 生图工作流](references/apimart-image-workflow.md)，并读取 `/Users/danny/.codex/skills/apimart-gpt-image-2/SKILL.md`。本阶段的风格测试图和正式分镜图只能通过 `$apimart-gpt-image-2` 的非官方 `gpt-image-2` 生成，并强制关闭官方渠道兜底；不得调用系统 `imagegen`、Imagen 或其他生图能力，也不得复制或移动它们的配置。
+读取并严格执行 [APIMart 生图工作流](references/apimart-image-workflow.md)，并读取同一 Skills 根目录下的 [`apimart-gpt-image-2`](../apimart-gpt-image-2/SKILL.md)。本阶段的风格测试图和正式分镜图只能通过 `$apimart-gpt-image-2` 的非官方 `gpt-image-2` 生成，并强制关闭官方渠道兜底；不得调用系统 `imagegen`、Imagen 或其他生图能力，也不得复制或移动它们的配置。
 
 真实时间轴生成后，按每个镜头的真实时长补全构图、黑白/彩色、画面关键词、具体参考单帧和 Seedance 动作。按 `character`、`mechanism`、`skin-cross-section`、`evidence-layout` 选择 1 张主参考单帧；确需兼顾另一种视觉类型时再选 1 张辅参考单帧。记录绝对路径和用途。
 
@@ -49,7 +49,7 @@ Fun-ASR 缺少配置或调用失败时必须停止并报告，不得切换到本
 
 ### 4. Seedance 视频
 
-读取 [seedance-workflow.md](references/seedance-workflow.md)，并在每次准备任务前完整读取 `/Users/danny/.codex/skills/seedance-video-generator/SKILL.md`，以当前参数和确认门为准。仅使用 `doubao-seedance-2-0-mini-260615`。每个分镜单独生成一个片段：提交时长使用整数 `seedance_duration_s`，成片时再按精确 `duration_s` 与全局帧切点裁切；只有用户明确不配音时，才使用已确认分镜表中的估算时长。不得统一生成 15 秒，也不得用一个任务生成整条长视频。先准备并展示完整 `model_text`、参考图、模型和参数；这是计费操作，必须等待用户明确确认后才提交。多模态参考与首尾帧模式不可混用。提交后验证 MP4、H.264、时长和分辨率。
+读取 [seedance-workflow.md](references/seedance-workflow.md)，并在每次准备任务前完整读取同一 Skills 根目录下的 [`seedance-video-generator`](../seedance-video-generator/SKILL.md)，以当前参数和确认门为准。仅使用 `doubao-seedance-2-0-mini-260615`。每个分镜单独生成一个片段：提交时长使用整数 `seedance_duration_s`，成片时再按精确 `duration_s` 与全局帧切点裁切；只有用户明确不配音时，才使用已确认分镜表中的估算时长。不得统一生成 15 秒，也不得用一个任务生成整条长视频。先准备并展示完整 `model_text`、参考图、模型和参数；这是计费操作，必须等待用户明确确认后才提交。多模态参考与首尾帧模式不可混用。提交后验证 MP4、H.264、时长和分辨率。
 
 ### 5. 字幕与成片
 
@@ -94,6 +94,6 @@ Fun-ASR 缺少配置或调用失败时必须停止并报告，不得切换到本
 - `scripts/doubao_tts.py`：安全读取 `.env`，调用豆包语音 V3 并输出 MP3、供应商诊断时间戳和非敏感元数据；其时间戳不得进入生产时间轴。
 - `scripts/aliyun_fun_asr.py`：默认真实时间戳客户端；读取 Skill `.env` 中的 `DASHSCOPE_API_KEY`，调用 `fun-asr-flash-2026-06-15` 并输出规范化词级时间戳。
 - `scripts/build_timeline.py`：只接受阿里云 Fun-ASR 规范化 JSON，将已确认旁白字符对齐到词级时间，输出真实时间轴分镜、SRT 和 ASS；来源不符或差异过大时失败。
-- `/Users/danny/.codex/skills/apimart-gpt-image-2/scripts/apimart_gpt_image_2.py`：唯一分镜生图客户端；从 APIMart Skill 自己的 `.env` 读取密钥，不与本 Skill 的豆包配置混用。
+- `../apimart-gpt-image-2/scripts/apimart_gpt_image_2.py`：唯一分镜生图客户端；从 APIMart Skill 自己的 `.env` 读取密钥，不与本 Skill 的豆包配置混用。
 - `assets/original-video-4s-contact-sheets/`：8 张高清接触表，仅用于浏览选型，不传给生图模型。
 - `assets/reference-frames/`：24 张独立参考帧，按人物、机制、剖面、证据/版式分类，作为生图实际输入。
