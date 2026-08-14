@@ -15,6 +15,22 @@ SPEC.loader.exec_module(MODULE)
 
 
 class BuildTimelineTests(unittest.TestCase):
+    def test_seedance_duration_never_falls_below_four_seconds(self) -> None:
+        document = [{"narration": "短镜头"}]
+
+        updated = MODULE.update_storyboard(
+            document,
+            document,
+            None,
+            [(0.0, 3.0)],
+            3.0,
+            MODULE.REQUIRED_TIMESTAMP_SOURCE,
+            "9:16",
+        )
+
+        self.assertEqual(updated[0]["duration_s"], 3.0)
+        self.assertEqual(updated[0]["seedance_duration_s"], 4)
+
     def test_reads_aliyun_normalized_source(self) -> None:
         document = {
             "segments": [

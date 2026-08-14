@@ -16,7 +16,7 @@
 |---|---|---|
 | Seedance 2.0 Mini（唯一允许） | `doubao-seedance-2-0-mini-260615` | 成本更低，最高 720p |
 
-唯一允许的 Model ID 为 `doubao-seedance-2-0-mini-260615`。本 Skill 不接受任何其他 Model ID 或 Endpoint ID；命令行、环境变量、`.env` 和批准单都会在 API 调用前校验。
+唯一允许的 Model ID 为 `doubao-seedance-2-0-mini-260615`。本 Skill 不接受任何其他 Model ID 或 Endpoint ID；命令行、环境变量、统一配置和批准单都会在 API 调用前校验。
 
 ## 人工确认协议
 
@@ -64,7 +64,7 @@ Content-Type: application/json
 - `content[].text`：本 Skill 必填。先写成最终 `model_text`，由 `prepare` 原样展示并等待人类确认。
 - `resolution`：`480p`、`720p`、`1080p`、`4k`，各模型支持范围不同。
 - `ratio`：`16:9`、`4:3`、`1:1`、`3:4`、`9:16`、`21:9`、`adaptive`。
-- `duration`：秒；具体范围以 Seedance 2.0 Mini 当前模型规则为准。
+- `duration`：4–15 秒整数，最短 4 秒；不得传 3 秒。需要更短成片时先生成至少 4 秒，再在本地裁切。
 - `generate_audio`：支持模型可生成有声或无声视频。
 - `watermark`：是否显示“AI 生成”水印。
 - `return_last_frame`：是否返回尾帧。

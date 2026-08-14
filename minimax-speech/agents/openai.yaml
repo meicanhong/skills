@@ -1,0 +1,4 @@
+interface:
+  display_name: "MiniMax Speech 2.8 HD"
+  short_description: "克隆音色并使用 speech-2.8-hd 生成音频"
+  default_prompt: "使用 $minimax-speech 克隆已获授权的音色，并生成一段 speech-2.8-hd 音频。"

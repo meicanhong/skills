@@ -20,6 +20,8 @@ from typing import Any
 
 DEFAULT_BASE_URL = "https://ark.cn-beijing.volces.com/api/v3"
 DEFAULT_MODEL = "doubao-seedance-2-0-mini-260615"
+MIN_DURATION_SECONDS = 4
+MAX_DURATION_SECONDS = 15
 SUPPORTED_MODELS: dict[str, dict[str, str]] = {
     "doubao-seedance-2-0-mini-260615": {
         "name": "Seedance 2.0 Mini",
@@ -68,18 +70,28 @@ def skill_root() -> Path:
     return Path(__file__).resolve().parent.parent
 
 
+def codex_home() -> Path:
+    configured = os.environ.get("CODEX_HOME", "").strip()
+    return Path(configured).expanduser() if configured else Path.home() / ".codex"
+
+
+def bundle_env_path() -> Path:
+    configured = os.environ.get("SKINCARE_VIDEO_ENV", "").strip()
+    return Path(configured).expanduser() if configured else codex_home() / "skincare-video-bundle.env"
+
+
 def resolve_model(model_override: str | None) -> str:
-    dotenv = load_dotenv(skill_root() / ".env")
+    dotenv = load_dotenv(bundle_env_path())
     model = model_override or os.environ.get("SEEDANCE_MODEL") or dotenv.get("SEEDANCE_MODEL") or DEFAULT_MODEL
     return validate_model(model)
 
 
 def load_settings(model_override: str | None) -> Settings:
-    root = skill_root()
-    dotenv = load_dotenv(root / ".env")
+    env_path = bundle_env_path()
+    dotenv = load_dotenv(env_path)
     api_key = os.environ.get("ARK_API_KEY") or dotenv.get("ARK_API_KEY", "")
     if not api_key:
-        raise SeedanceError(f"请先在 {root / '.env'} 中填写 ARK_API_KEY")
+        raise SeedanceError(f"请先在 {env_path} 中填写 ARK_API_KEY")
     model = resolve_model(model_override)
     base_url = os.environ.get("ARK_BASE_URL") or dotenv.get("ARK_BASE_URL", DEFAULT_BASE_URL)
     return Settings(api_key=api_key, model=model, base_url=base_url.rstrip("/"))
@@ -245,6 +257,7 @@ def build_payload(args: argparse.Namespace, model: str) -> dict[str, Any]:
         value = getattr(args, name, None)
         if value is not None:
             payload[name] = value
+    validate_payload_model_compatibility(payload)
     return payload
 
 
@@ -275,6 +288,16 @@ def validate_payload_model_compatibility(payload: dict[str, Any]) -> None:
         raise SeedanceError(
             "批准单包含 Seedance 2.0 Mini 不支持的 camera_fixed；"
             "请将固定机位要求写入 model_text 后重新 prepare 并确认"
+        )
+    duration = payload.get("duration")
+    if duration is not None and (
+        isinstance(duration, bool)
+        or not isinstance(duration, int)
+        or not MIN_DURATION_SECONDS <= duration <= MAX_DURATION_SECONDS
+    ):
+        raise SeedanceError(
+            "Seedance 2.0 Mini 的 duration 必须是 "
+            f"{MIN_DURATION_SECONDS}–{MAX_DURATION_SECONDS} 秒整数"
         )
 
 
@@ -449,7 +472,13 @@ def add_generation_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--reference-audio", action="append", default=[])
     parser.add_argument("--resolution", choices=("480p", "720p", "1080p", "4k"))
     parser.add_argument("--ratio", choices=("16:9", "4:3", "1:1", "3:4", "9:16", "21:9", "adaptive"))
-    parser.add_argument("--duration", type=int)
+    parser.add_argument(
+        "--duration",
+        type=int,
+        choices=range(MIN_DURATION_SECONDS, MAX_DURATION_SECONDS + 1),
+        metavar="SECONDS",
+        help=f"生成时长，必须为 {MIN_DURATION_SECONDS}–{MAX_DURATION_SECONDS} 秒整数",
+    )
     parser.add_argument("--seed", type=int)
     parser.add_argument("--watermark", action=argparse.BooleanOptionalAction, default=None)
     parser.add_argument("--generate-audio", action=argparse.BooleanOptionalAction, default=None)

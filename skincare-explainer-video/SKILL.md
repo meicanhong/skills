@@ -1,6 +1,6 @@
 ---
 name: skincare-explainer-video
-description: 将护肤、成分和皮肤机制主题制作成中国护肤电商手绘科普风格视频，按“旁白与语义分镜、豆包复刻配音、阿里云 Fun-ASR-Flash 检测真实时间轴、APIMart GPT-Image-2 风格测试与分镜图片、Seedance 2.0 Mini 视频、字幕成片”执行；用户要求还原抖音护肤科普画面、生成成分机制动画或制作同风格视频时使用。
+description: 将护肤、成分和皮肤机制主题制作成中国护肤电商手绘科普风格视频，按“旁白与语义分镜、MiniMax Speech 2.8 HD 克隆音色配音、阿里云 Fun-ASR-Flash 检测真实时间轴、APIMart GPT-Image-2 风格测试与分镜图片、Seedance 2.0 Mini 视频、字幕成片”执行；用户要求还原抖音护肤科普画面、生成成分机制动画或制作同风格视频时使用。
 ---
 
 # 护肤科普手绘视频
@@ -9,51 +9,63 @@ description: 将护肤、成分和皮肤机制主题制作成中国护肤电商�
 
 ## 必须遵守的流程
 
+### 五个确认门
+
+常规生产只允许以下 5 次人工确认，不得再拆出额外确认轮次：
+
+1. **旁白与语义分镜**：确认完整旁白、镜头划分、画面意图和配音参数。
+2. **MiniMax 配音＋Fun-ASR**：在同一次回复中展示两项计费调用的模型、参数、输入、输出路径和各 1 次任务；用户一次确认后依次生成配音、运行 Fun-ASR 并自动构建时间线。
+3. **风格测试图生成**：确认测试镜头的完整 Prompt、参考图、画幅和 1 次 APIMart 任务。
+4. **风格测试效果＋正式分镜批量生成**：直接展示测试图，同时展示正式批次的任务数、通用参数、逐镜头 Prompt 与参考图；用户一次确认后生成整批正式分镜。
+5. **正式分镜效果＋整批 Seedance**：逐张直接展示全部正式分镜，同时展示所有 Seedance `prepare` 结果、背景音乐选择和整批任务参数；用户一次确认后提交已列明的全部 Seedance 任务，并自动完成下载、裁切、字幕、合成和技术验收。
+
+配置检查、dry-run、状态查询、轮询、已有结果下载、时间线/SRT/ASS 生成、本地裁切、拼接、编码和成片技术验收不需要确认。第五次未提供背景音乐时默认不加。新增计费任务、失败后的付费重试、用户要求重做、任务数量增加，或模型和关键参数变化时，只对新增或变化部分重新确认；这类异常确认不计入常规 5 次。
+
 ### 0. 读取风格规范
 
-先读取 [asset-catalog.md](references/asset-catalog.md) 和 [style-guide.md](references/style-guide.md)。`assets/original-video-4s-contact-sheets/` 中的 8 张接触表只用于浏览、比较和选型；不得将整张接触表传给生图模型。真正的生图参考必须从 `assets/reference-frames/` 中选择独立单帧。若用户另给参考视频或图片，再补充分析，但不得覆盖默认原视频资产。
+先读取 [asset-catalog.md](references/asset-catalog.md) 和 [style-guide.md](references/style-guide.md)。生图参考必须从发行包自带的 `assets/reference-frames/` 中选择独立单帧。若用户另给参考视频或图片，再补充分析，但不得覆盖默认参考资产。
 
 本阶段只读取规范，理解这种画风能清晰表达什么，并记录画幅、平台规格、旁白语速和交付格式；抖音项目默认统一为 `9:16`、字幕画布 `1080×1920`，只有用户明确指定横屏时才改为 `16:9`。不得生成风格测试图、正式分镜图或调用 Seedance。具体参考帧选择和“风格锁定卡”延后到真实时间轴生成之后。
 
 ### 1. 脚本与分镜
 
-先读取并严格执行 [script-storyboard-contract.md](references/script-storyboard-contract.md)。先写完整口语旁白，再按“一个因果动作一个镜头”拆分，最后依据当前复刻音色在 `speech_rate=0` 下每秒 5.0 个汉字的实测基线计算时长。默认完整机制视频为 45–60 秒、8–12 个镜头；单镜头默认 5 秒、允许 3–8 秒。超过 8 秒必须拆镜头，不能用加快配音或一张图硬撑。
+先读取并严格执行 [script-storyboard-contract.md](references/script-storyboard-contract.md)。先写完整口语旁白，再按“一个因果动作一个镜头”拆分，最后依据公司内部获授权的老王棚拍版音色在 `speed=1.0` 下每秒 5.0 个汉字的生产估算基线计算时长。默认完整机制视频为 45–60 秒、8–12 个镜头；成片单镜头默认 5 秒、允许 3–8 秒。超过 8 秒必须拆镜头，不能用加快配音或一张图硬撑。这里的 3 秒仅指成片裁切时长，不是 Seedance 提交时长。
 
 先输出合同中的“语义分镜确认表”并等待确认：目标受众、预计总时长、核心卖点、前三秒钩子、完整旁白、镜头旁白段落、唯一动作、画面意图和配音参数。此时起止时间只是估算，不选择具体参考帧，不生成图片。
 
 每个镜头只表达一个因果动作，优先覆盖：生活痛点、情绪夸张、黑白线稿转彩、问题状态、皮肤/头皮剖面、拟人化机制、成分卡、证据或报告、前后对比、情绪收束。
 
-### 2. 豆包复刻配音、Fun-ASR 与真实时间轴
+### 2. MiniMax 克隆音色配音、Fun-ASR 与真实时间轴
 
-读取并严格执行 [voiceover-workflow.md](references/voiceover-workflow.md)。旁白、镜头划分和配音参数确认后，立即把整条视频旁白一次性交给豆包声音复刻 2.0 合成，保持音色和情绪连续。不得等风格测试图或正式分镜图片完成后才配音。
+读取并严格执行 [voiceover-workflow.md](references/voiceover-workflow.md)，并在调用前完整读取 `${CODEX_HOME:-$HOME/.codex}/skills/minimax-speech/SKILL.md`。旁白、镜头划分和配音参数确认后，立即把整条视频旁白一次性交给 MiniMax `speech-2.8-hd` 合成，默认使用公司内部获授权的老王棚拍版 `GuangxiLaoWang_Studio_20260814`，保持音色和情绪连续；`MINIMAX_VOICE_ID` 可覆盖默认值。不得等风格测试图或正式分镜图片完成后才配音。
 
-调用会计费；先展示完整旁白、模型、Resource ID、语速、表演指令和输出路径，等待明确确认后才运行 `scripts/doubao_tts.py synthesize`。不得展示或传递 API Key。
+MiniMax 和 Fun-ASR 都会计费，在第 2 次确认中合并展示：完整旁白、MiniMax 模型、`voice_id`、语速、情感及文本内语气/停顿控制、TTS 输出路径，以及 Fun-ASR 固定模型、音频输入、完整旁白上下文和 ASR 输出路径。用户一次确认同时授权各 1 次调用；不得展示或传递 API Key。默认不强制设置 `emotion`，也不自动加入语气标签或精确停顿。
 
-语音生成后必须使用 `scripts/aliyun_fun_asr.py` 和固定模型 `fun-asr-flash-2026-06-15` 对最终 MP3 重新检测，生成带词级时间戳的规范化 ASR JSON；这是计费调用，先展示模型、音频、完整旁白上下文、输出路径并等待明确确认。豆包返回的时间戳不得用于分镜、字幕或剪辑。随后运行 `scripts/build_timeline.py`，同时传入语义分镜、原旁白文件、豆包元数据、MP3 和 ASR JSON。豆包元数据中的 `narration_sha256` 必须与旁白文件一致，分镜各段拼接后也必须与该旁白一致。已确认旁白负责准确文字，Fun-ASR 只负责真实时间；ASR 编辑率超过 5% 给出质量警告，超过 10% 停止。以 Fun-ASR 驱动的 timed JSON 为后续唯一时间真值。
+MiniMax 成功后直接使用 `scripts/aliyun_fun_asr.py` 和固定模型 `fun-asr-flash-2026-06-15` 对最终 MP3 检测，生成带词级时间戳的规范化 ASR JSON，不再单独询问。MiniMax 响应信息不得用于分镜、字幕或剪辑。随后自动运行 `scripts/build_timeline.py`，同时传入语义分镜、原旁白文件、MiniMax TTS 元数据、MP3 和 ASR JSON。TTS 元数据中的 `narration_sha256` 必须与旁白文件一致，分镜各段拼接后也必须与该旁白一致。已确认旁白负责准确文字，Fun-ASR 只负责真实时间；ASR 编辑率超过 5% 给出质量警告，超过 10% 停止。以 Fun-ASR 驱动的 timed JSON 为后续唯一时间真值。
 
 Fun-ASR 缺少配置或调用失败时必须停止并报告，不得切换到本地 Whisper、MLX 或其他 ASR。本 Skill 的生产时间轴只接受 `aliyun_fun_asr.py` 输出；如用户另行要求 A/B 研究，也不得用研究结果替代生产时间轴。
 
 ### 3. 风格测试与分镜图片
 
-读取并严格执行 [APIMart 生图工作流](references/apimart-image-workflow.md)，并读取同一 Skills 根目录下的 [`apimart-gpt-image-2`](../apimart-gpt-image-2/SKILL.md)。本阶段的风格测试图和正式分镜图只能通过 `$apimart-gpt-image-2` 的非官方 `gpt-image-2` 生成，并强制关闭官方渠道兜底；不得调用系统 `imagegen`、Imagen 或其他生图能力，也不得复制或移动它们的配置。
+读取并严格执行 [APIMart 生图工作流](references/apimart-image-workflow.md)，并读取 `${CODEX_HOME:-$HOME/.codex}/skills/apimart-gpt-image-2/SKILL.md`。本阶段的风格测试图和正式分镜图只能通过 `$apimart-gpt-image-2` 的非官方 `gpt-image-2` 生成，并强制关闭官方渠道兜底；不得调用系统 `imagegen`、Imagen 或其他生图能力，也不得复制或移动它们的配置。
 
 真实时间轴生成后，按每个镜头的真实时长补全构图、黑白/彩色、画面关键词、具体参考单帧和 Seedance 动作。按 `character`、`mechanism`、`skin-cross-section`、`evidence-layout` 选择 1 张主参考单帧；确需兼顾另一种视觉类型时再选 1 张辅参考单帧。记录绝对路径和用途。
 
-再写“风格锁定卡”，包含线稿、角色、色彩语义、构图、文字层、镜头节奏和禁止项，并选择一个真实镜头准备 1 张风格测试图。APIMart 生图会计费：先展示完整 Prompt、每个 `--image` 的绝对路径与用途、`size`、`resolution`、`n`、`official_fallback=false` 和输出目录，运行不计费的 dry-run，然后等待用户明确确认，才能提交真实生成。风格测试图确认后，以同样方式展示正式分镜批次并再次等待确认，才可按默认并发数 `5` 生成；风格测试始终单任务执行。
+再写“风格锁定卡”，包含线稿、角色、色彩语义、构图、文字层、镜头节奏和禁止项，并选择一个真实镜头准备 1 张风格测试图。第 3 次确认展示完整 Prompt、每个 `--image` 的绝对路径与用途、`size`、`resolution`、`n`、`official_fallback=false` 和输出目录；确认后提交 1 次测试图任务。测试图生成后，在第 4 次确认中直接展示图片，并同时展示正式分镜批次的完整参数；用户一次确认测试效果和正式批次后，才按默认并发数 `5` 生成。
 
 每次调用都必须把已选独立参考帧通过 APIMart CLI 的 `--image /绝对路径/单帧.png` 实际上传；主辅参考各写一个 `--image`。Prompt 中同时说明图 1、图 2 分别锁定人物、剖面、机制或版式中的哪一项。只在 Prompt 中提到目录、文件名或“参考 assets”不算完成引用。不得使用 subagent 的 `local_image` 或其他生图工具绕过 APIMart。
 
 不得把接触表作为生图输入。默认只放一个 2–4 字画面关键词，不生成底部字幕；中文长句、品牌名和专业标签后期叠加。生成后检查线稿、角色比例、背景、色彩语义、主体位置、符号和文字。漂移图片不得进入视频阶段。不得把上一张生成图作为唯一参考；至少一张原视频独立参考帧必须始终保留在参考输入中。
 
-图片生成完成后必须在当前 Codex 任务中直接展示，不得只返回文件路径、Markdown 普通链接、任务 ID 或文字评价。风格测试图生成后立即用本地绝对路径的 Markdown 图片语法 `![风格测试](/absolute/path/image.png)` 展示并等待用户确认；正式批次完成后按镜头顺序逐张使用 `![镜头 01](/absolute/path/shot-01.png)` 展示所有成功图片。远端 URL 只作记录，不用于展示；图片过多也不得只展示接触表替代原图。未完成直接展示与用户确认前，不进入 Seedance 阶段。
+图片生成完成后必须在当前 Codex 任务中直接展示，不得只返回文件路径、Markdown 普通链接、任务 ID 或文字评价。风格测试图在第 4 次确认中用 `![风格测试](/absolute/path/image.png)` 展示；正式批次按镜头顺序逐张用 `![镜头 01](/absolute/path/shot-01.png)` 展示，并与整批 Seedance 参数和背景音乐选择合并为第 5 次确认。远端 URL 只作记录，不用于展示；图片过多也不得只展示接触表替代原图。
 
 ### 4. Seedance 视频
 
-读取 [seedance-workflow.md](references/seedance-workflow.md)，并在每次准备任务前完整读取同一 Skills 根目录下的 [`seedance-video-generator`](../seedance-video-generator/SKILL.md)，以当前参数和确认门为准。仅使用 `doubao-seedance-2-0-mini-260615`。每个分镜单独生成一个片段：提交时长使用整数 `seedance_duration_s`，成片时再按精确 `duration_s` 与全局帧切点裁切；只有用户明确不配音时，才使用已确认分镜表中的估算时长。不得统一生成 15 秒，也不得用一个任务生成整条长视频。先准备并展示完整 `model_text`、参考图、模型和参数；这是计费操作，必须等待用户明确确认后才提交。多模态参考与首尾帧模式不可混用。提交后验证 MP4、H.264、时长和分辨率。
+读取 [seedance-workflow.md](references/seedance-workflow.md)，并在每次准备任务前完整读取 `${CODEX_HOME:-$HOME/.codex}/skills/seedance-video-generator/SKILL.md`，以当前参数和批准单边界为准。仅使用 `doubao-seedance-2-0-mini-260615`。每个分镜单独生成一个片段：提交时长使用 4–15 秒整数 `seedance_duration_s=max(4, ceil(duration_s))`，禁止传 3 秒；成片时再按精确 `duration_s` 与全局帧切点裁切。为全部镜头运行不计费的 `prepare`，在第 5 次确认中逐项展示；用户一次确认即批准当次列明的整批 approval ID，随后依次运行 `approve` 和 `submit`，不逐镜头再次询问。多模态参考与首尾帧模式不可混用。提交后验证 MP4、H.264、时长和分辨率。
 
 ### 5. 字幕与成片
 
-用 Fun-ASR 真实时间戳和已确认旁白生成底部字幕。按 ASR 时间轴裁切和拼接 Seedance 片段，叠加完整旁白、字幕和用户确认的背景音乐。所有镜头切点必须先映射到整条成片的全局帧轴：`frame=floor(semantic_start_s*fps)`；禁止逐段向上取整后累加。最终读回实际场景切点，确保画面切换不晚于对应语义发声、字幕与声音同步、总时长匹配。
+用 Fun-ASR 真实时间戳和已确认旁白生成底部字幕。按 ASR 时间轴裁切和拼接 Seedance 片段，叠加完整旁白、字幕和第 5 次确认中的背景音乐；未提供时默认不加音乐。第五次确认后自动完成，不再询问合成或导出确认。所有镜头切点必须先映射到整条成片的全局帧轴：`frame=floor(semantic_start_s*fps)`；禁止逐段向上取整后累加。最终自动读回实际场景切点，确保画面切换不晚于对应语义发声、字幕与声音同步、总时长匹配，并直接交付成片。
 
 ## 画风硬约束
 
@@ -88,12 +100,11 @@ Fun-ASR 缺少配置或调用失败时必须停止并报告，不得切换到本
 - [style-guide.md](references/style-guide.md)：完整 Prompt、负面 Prompt、文字规则和一致性检查表。
 - [apimart-image-workflow.md](references/apimart-image-workflow.md)：APIMart 计费确认、参考帧上传、dry-run、生成、轮询、下载和批量失败处理。
 - [script-storyboard-contract.md](references/script-storyboard-contract.md)：旁白字数、镜头拆分、时长公式、语义分镜确认表和真实时间轴生产分镜表。
-- [asset-catalog.md](references/asset-catalog.md)：接触表与 24 张独立参考帧的用途、选择规则和强制传参方法。
-- [voiceover-workflow.md](references/voiceover-workflow.md)：豆包复刻配音、计费确认、真实时间轴回写和字幕规则。
+- [asset-catalog.md](references/asset-catalog.md)：24 张独立参考帧的用途、选择规则和强制传参方法。
+- [voiceover-workflow.md](references/voiceover-workflow.md)：MiniMax 克隆音色配音、计费确认、真实时间轴回写和字幕规则。
 - [seedance-workflow.md](references/seedance-workflow.md)：Seedance 参数、确认门和失败处理。
-- `scripts/doubao_tts.py`：安全读取 `.env`，调用豆包语音 V3 并输出 MP3、供应商诊断时间戳和非敏感元数据；其时间戳不得进入生产时间轴。
-- `scripts/aliyun_fun_asr.py`：默认真实时间戳客户端；读取 Skill `.env` 中的 `DASHSCOPE_API_KEY`，调用 `fun-asr-flash-2026-06-15` 并输出规范化词级时间戳。
+- `scripts/minimax_tts.py`：复用全局 MiniMax Speech Skill 的密钥和客户端，调用 `speech-2.8-hd` 默认光希老王棚拍版音色，输出 MP3 和带旁白哈希的非敏感元数据；MiniMax 响应信息不得进入生产时间轴。
+- `scripts/aliyun_fun_asr.py`：默认真实时间戳客户端；读取统一配置中的 `DASHSCOPE_API_KEY`，调用 `fun-asr-flash-2026-06-15` 并输出规范化词级时间戳。
 - `scripts/build_timeline.py`：只接受阿里云 Fun-ASR 规范化 JSON，将已确认旁白字符对齐到词级时间，输出真实时间轴分镜、SRT 和 ASS；来源不符或差异过大时失败。
-- `../apimart-gpt-image-2/scripts/apimart_gpt_image_2.py`：唯一分镜生图客户端；从 APIMart Skill 自己的 `.env` 读取密钥，不与本 Skill 的豆包配置混用。
-- `assets/original-video-4s-contact-sheets/`：8 张高清接触表，仅用于浏览选型，不传给生图模型。
+- `${CODEX_HOME:-$HOME/.codex}/skills/apimart-gpt-image-2/scripts/apimart_gpt_image_2.py`：唯一分镜生图客户端；读取统一配置中的 `APIMART_API_KEY`。
 - `assets/reference-frames/`：24 张独立参考帧，按人物、机制、剖面、证据/版式分类，作为生图实际输入。

@@ -5,18 +5,18 @@
 - 唯一生图提供方：`$apimart-gpt-image-2`。
 - 唯一模型：非官方 `gpt-image-2`。
 - 每个请求必须包含 `official_fallback=false`，禁止因上游不可用切到高价官方渠道。
-- 唯一客户端：同一 Skills 根目录下的 `apimart-gpt-image-2/scripts/apimart_gpt_image_2.py`。
-- 密钥只由 APIMart Skill 根目录的 `.env` 提供；不得复制到本 Skill 的 `.env`，不得显示或记录。
+- 唯一客户端：`${CODEX_HOME:-$HOME/.codex}/skills/apimart-gpt-image-2/scripts/apimart_gpt_image_2.py`。
+- 密钥只由统一配置中的 `APIMART_API_KEY` 提供；不得显示或记录。
 - 不调用系统 `imagegen`、Imagen、subagent 生图或其他图片模型作为 fallback。
 
-每次开始风格测试或正式分镜生图前，完整读取 [`../../apimart-gpt-image-2/SKILL.md`](../../apimart-gpt-image-2/SKILL.md)，以其当前 API 参数、安全边界、轮询和下载规则为准。执行命令前，将该依赖 Skill 的实际根目录解析为绝对路径 `APIMART_SKILL_ROOT`；不得假设用户名或固定的 `~/.codex` 路径。
+每次开始风格测试或正式分镜生图前，完整读取 `${CODEX_HOME:-$HOME/.codex}/skills/apimart-gpt-image-2/SKILL.md`，以其当前 API 参数、安全边界、轮询和下载规则为准。
 
 ## 前置条件
 
 只有同时满足以下条件才准备生图：
 
 1. 旁白与语义分镜已确认。
-2. 整条豆包配音已生成，并已用 `fun-asr-flash-2026-06-15` 检测最终音频的真实词句时间戳。
+2. 整条 MiniMax 配音已生成，并已用 `fun-asr-flash-2026-06-15` 检测最终音频的真实词句时间戳。
 3. `storyboard.timed.json` 已生成且镜头均不超过 8 秒。
 4. 当前镜头的构图、色彩状态、2–4 字关键词、唯一动作和参考帧已补全。
 5. 已记录输出画幅；抖音项目默认统一为 `9:16`，只有用户明确指定横屏时才使用 `16:9`。APIMart、Seedance、字幕和最终成片必须使用同一画幅。
@@ -32,11 +32,11 @@
 5. `style-guide.md` 的负面 Prompt，以 `Avoid:` 段落并入正文；APIMart 接口没有独立 `negative_prompt` 字段。
 6. 明确“不复制参考图中的品牌、产品、字幕或功效结论；不生成底部字幕、Logo 和水印”。
 
-## 计费确认门
+## 第 3、4 次确认
 
-APIMart 生成会计费。风格测试和正式批次是两个独立确认门。
+APIMart 生成会计费，使用两个确认门：第 3 次只授权 1 张风格测试图；第 4 次同时确认测试效果和正式分镜批次生成。
 
-提交前向用户展示：
+相应确认前向用户展示：
 
 - 镜头 ID 和用途（风格测试/正式分镜）。
 - 完整 Prompt。
@@ -46,14 +46,14 @@ APIMart 生成会计费。风格测试和正式批次是两个独立确认门。
 - 本批次将创建的任务数量。
 - 正式分镜批次的并发数，默认 `5`。
 
-未获得当前阶段明确确认时停止。旧阶段确认、风格测试确认或 Seedance 确认不能代替正式分镜批次确认。
+第 3 次确认只覆盖测试图；第 4 次确认覆盖当时列明的正式批次。新增任务或付费重试只对新增部分重新确认。
 
 ## 无计费预检
 
 先确认参考帧是独立图片而非接触表，并检查文件存在、格式和尺寸。然后运行不带本地 `--image` 的 dry-run 验证生成参数；本地参考图会在真实提交时由 `--image` 上传，dry-run 不上传文件。
 
 ```bash
-python3 "$APIMART_SKILL_ROOT/scripts/apimart_gpt_image_2.py" \
+python3 ${CODEX_HOME:-$HOME/.codex}/skills/apimart-gpt-image-2/scripts/apimart_gpt_image_2.py \
   generate \
   --prompt "$FULL_PROMPT" \
   --size 9:16 \
@@ -69,7 +69,7 @@ python3 "$APIMART_SKILL_ROOT/scripts/apimart_gpt_image_2.py" \
 用户批准后，只生成 1 张真实镜头测试图。每张参考帧各写一个 `--image`：
 
 ```bash
-python3 "$APIMART_SKILL_ROOT/scripts/apimart_gpt_image_2.py" \
+python3 ${CODEX_HOME:-$HOME/.codex}/skills/apimart-gpt-image-2/scripts/apimart_gpt_image_2.py \
   --verbose generate \
   --prompt "$FULL_PROMPT" \
   --image "/absolute/path/to/main-reference.png" \
@@ -87,11 +87,11 @@ python3 "$APIMART_SKILL_ROOT/scripts/apimart_gpt_image_2.py" \
 ![风格测试镜头 07](/absolute/project/path/images/style-test/shot-07.png)
 ```
 
-普通文件链接、远端 URL、任务 ID 或“已生成”的文字不能代替图片展示。展示后等待用户确认风格，不得直接开始正式批次。
+普通文件链接、远端 URL、任务 ID 或“已生成”的文字不能代替图片展示。展示测试图时，同时展示正式批次任务数、完整参数、逐镜头 Prompt 和参考图，作为第 4 次确认；不另开一次正式批次参数确认。
 
 ## 正式分镜批次
 
-风格测试图得到用户确认后，为每个镜头准备一条完整命令和独立目录，例如 `images/shot-01/`。展示完整批次并再次等待用户确认，然后才可并发执行。默认并发数为 `5`：任一时刻最多运行 5 个 APIMart 正式分镜任务；任务完成或明确失败后再补入下一个，直到批次结束。镜头少于 5 个时按实际数量执行；用户可在批次确认时明确降低或提高并发数。
+第 4 次确认通过后，为每个镜头使用已展示的完整命令和独立目录，例如 `images/shot-01/`，直接并发执行，不再询问。默认并发数为 `5`：任一时刻最多运行 5 个 APIMart 正式分镜任务；任务完成或明确失败后再补入下一个，直到批次结束。镜头少于 5 个时按实际数量执行；用户可在第 4 次确认时调整并发数。
 
 - 每个镜头固定 `n=1`，避免一条任务产生未审核变体。
 - 每个镜头始终至少带 1 张原视频独立参考帧。已确认风格测试图可作为附加参考，但不能替代原视频帧。
@@ -99,7 +99,7 @@ python3 "$APIMART_SKILL_ROOT/scripts/apimart_gpt_image_2.py" \
 - 风格测试图始终单任务执行，不计入正式分镜批次的默认并发数。
 - 每张完成图都要实际打开检查，并记录镜头 ID、任务 ID、本地路径、远端 URL 到期时间、费用和 token 用量。
 
-## 批次展示与确认门
+## 第 5 次确认：正式分镜与 Seedance
 
 正式批次全部完成或明确失败后，先汇总成功、失败和隔离状态，再按镜头编号逐张在当前 Codex 任务中展示所有成功的本地原图：
 
@@ -112,7 +112,7 @@ python3 "$APIMART_SKILL_ROOT/scripts/apimart_gpt_image_2.py" \
 - 必须使用 `![说明](本地绝对路径)` 图片语法，使 Codex 客户端直接渲染图片；不得只给可点击路径。
 - 必须展示每张成功原图，不能只展示拼图、接触表或任意抽样；可额外提供接触表帮助总览，但不能替代原图。
 - 每张图的说明至少包含镜头编号；失败或被隔离的镜头在相应位置明确标注原因，不伪造占位图。
-- 展示完成后明确请求用户审核这一批分镜。用户确认前不得运行 Seedance `prepare`，更不得提交视频生成。
+- 正式图片完成后可以运行不计费的 Seedance `prepare`。逐张展示全部分镜时，同时展示所有 `prepare` 结果、整批任务参数和背景音乐选择，合并为第 5 次确认；确认前不得运行 `approve` 或 `submit`。
 
 ## 失败处理
 

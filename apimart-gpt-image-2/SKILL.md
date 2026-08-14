@@ -10,22 +10,22 @@ description: 通过 APIMart 的非官方 gpt-image-2 API 生成或编辑图片�
 ## 安全边界
 
 - 仅在用户明确要求生成、编辑或重绘图片时提交生成任务。
-- 优先从本 Skill 根目录的 `.env` 读取密钥；未配置时才读取系统环境变量 `APIMART_API_KEY`。不得输出密钥或拼入命令行参数。
+- 优先读取系统环境变量 `APIMART_API_KEY`，否则读取 `${CODEX_HOME:-$HOME/.codex}/skincare-video-bundle.env`。不得输出密钥或拼入命令行参数。
 - 固定使用非官方模型 `gpt-image-2`，并在每个请求中强制发送 `official_fallback=false`；不得接受用户覆盖模型名或开启官方渠道兜底。
 - 不自动重试生成、上传等 `POST` 请求，避免重复任务或重复计费。
 - 只对 `GET` 任务轮询中的 `429`、`500`、`502` 和网络瞬时错误做有限退避重试。
 - 不触碰 `~/.codex/skills/.system/imagegen`、任何 Imagen Skill 或它们的配置。
-- 没有密钥时停止并指出 `.env` 路径；不要索要用户在聊天中粘贴密钥。
+- 没有密钥时停止并指出统一配置路径；不要索要用户在聊天中粘贴密钥。
 
 ## 配置
 
-把 API Key 写入本 Skill 根目录的 `.env`：
+把 API Key 写入 `${CODEX_HOME:-$HOME/.codex}/skincare-video-bundle.env`：
 
 ```dotenv
 APIMART_API_KEY=你的密钥
 ```
 
-`.env` 权限必须保持为 `600`，且已由 `.gitignore` 排除。不要在命令、聊天或日志中显示文件内容。
+统一配置权限必须保持为 `600`。不要在命令、聊天或日志中显示文件内容。
 
 ## 工作流
 

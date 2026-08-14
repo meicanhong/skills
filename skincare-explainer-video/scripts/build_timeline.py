@@ -16,6 +16,8 @@ import unicodedata
 
 MIN_SCENE_SECONDS = 0.35
 MAX_SCENE_SECONDS = 8.0
+MIN_SEEDANCE_DURATION_SECONDS = 4
+MAX_SEEDANCE_DURATION_SECONDS = 15
 MAX_SUBTITLE_CHARS = 15
 PREFERRED_SUBTITLE_CHARS = 8
 ASR_EDIT_WARNING_RATIO = 0.05
@@ -66,14 +68,14 @@ def validate_narration_contract(
     scenes: list[dict[str, object]], narration: str, tts_metadata: object
 ) -> str:
     if not isinstance(tts_metadata, dict):
-        raise TimelineError("豆包元数据必须是 JSON 对象")
+        raise TimelineError("TTS 元数据必须是 JSON 对象")
     recorded_hash = tts_metadata.get("narration_sha256")
     actual_hash = narration_sha256(narration)
     if not isinstance(recorded_hash, str) or recorded_hash != actual_hash:
-        raise TimelineError("旁白文件与豆包实际合成文本的 SHA-256 不一致")
+        raise TimelineError("旁白文件与 TTS 实际合成文本的 SHA-256 不一致")
     storyboard_text = "".join(str(scene["narration"]) for scene in scenes)
     if narration_contract_text(storyboard_text) != narration_contract_text(narration):
-        raise TimelineError("分镜 narration 与豆包实际合成旁白不一致")
+        raise TimelineError("分镜 narration 与 TTS 实际合成旁白不一致")
     return actual_hash
 
 
@@ -436,7 +438,13 @@ def update_storyboard(
         updated["start_s"] = round(start, 3)
         updated["end_s"] = round(end, 3)
         updated["duration_s"] = round(end - start, 3)
-        updated["seedance_duration_s"] = math.ceil(end - start)
+        seedance_duration = max(MIN_SEEDANCE_DURATION_SECONDS, math.ceil(end - start))
+        if seedance_duration > MAX_SEEDANCE_DURATION_SECONDS:
+            raise TimelineError(
+                f"镜头 {index} 需要提交 {seedance_duration} 秒，超过 Seedance 2.0 Mini "
+                f"上限 {MAX_SEEDANCE_DURATION_SECONDS} 秒；必须拆镜头"
+            )
+        updated["seedance_duration_s"] = seedance_duration
         updated["timestamp_source"] = timestamp_source
         updated_scenes.append(updated)
 

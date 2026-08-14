@@ -23,7 +23,6 @@ BASE_URL = "https://api.apimart.ai"
 MODEL = "gpt-image-2"
 API_KEY_ENV = "APIMART_API_KEY"
 SKILL_DIR = Path(__file__).resolve().parent.parent
-ENV_FILE = SKILL_DIR / ".env"
 RATIOS = {
     "auto", "1:1", "3:2", "2:3", "4:3", "3:4", "5:4", "4:5",
     "16:9", "9:16", "2:1", "1:2", "3:1", "1:3", "21:9", "9:21",
@@ -37,6 +36,16 @@ LOGGER = logging.getLogger("apimart_gpt_image_2")
 
 class ClientError(RuntimeError):
     """Represent a validated input, HTTP, API, or response-shape failure."""
+
+
+def codex_home() -> Path:
+    configured = os.environ.get("CODEX_HOME", "").strip()
+    return Path(configured).expanduser() if configured else Path.home() / ".codex"
+
+
+def bundle_env_path() -> Path:
+    configured = os.environ.get("SKINCARE_VIDEO_ENV", "").strip()
+    return Path(configured).expanduser() if configured else codex_home() / "skincare-video-bundle.env"
 
 
 def emit_log(event: str, **fields: Any) -> None:
@@ -68,9 +77,10 @@ def load_api_key_from_env_file(path: Path) -> str:
 
 
 def require_api_key() -> str:
-    api_key = load_api_key_from_env_file(ENV_FILE) or os.environ.get(API_KEY_ENV, "").strip()
+    env_file = bundle_env_path()
+    api_key = os.environ.get(API_KEY_ENV, "").strip() or load_api_key_from_env_file(env_file)
     if not api_key:
-        raise ClientError(f"缺少 {API_KEY_ENV}；请填写 {ENV_FILE}，不要在聊天中粘贴密钥")
+        raise ClientError(f"缺少 {API_KEY_ENV}；请填写 {env_file}，不要在聊天中粘贴密钥")
     return api_key
 
 

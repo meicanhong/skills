@@ -2,6 +2,8 @@
 .env
 .env.*
 credentials.env
+company.env
+skincare-video-bundle.env
 *.cnf
 *.pem
 *.key

@@ -54,10 +54,32 @@ class SeedanceTests(unittest.TestCase):
         )
         self.assertNotIn("camera_fixed", payload)
 
+    def test_accepts_duration_boundaries(self):
+        for duration in (4, 15):
+            with self.subTest(duration=duration):
+                payload = seedance.build_payload(
+                    self.base_args(duration=duration), seedance.DEFAULT_MODEL
+                )
+                self.assertEqual(payload["duration"], duration)
+
+    def test_rejects_duration_outside_mini_range(self):
+        for duration in (3, 16):
+            with self.subTest(duration=duration):
+                with self.assertRaisesRegex(seedance.SeedanceError, "4–15 秒整数"):
+                    seedance.build_payload(
+                        self.base_args(duration=duration), seedance.DEFAULT_MODEL
+                    )
+
     def test_old_approval_with_camera_fixed_is_rejected_before_api(self):
         payload = seedance.build_payload(self.base_args(), seedance.DEFAULT_MODEL)
         payload["camera_fixed"] = True
         with self.assertRaisesRegex(seedance.SeedanceError, "不支持的 camera_fixed"):
+            seedance.validate_payload_model_compatibility(payload)
+
+    def test_old_approval_with_three_second_duration_is_rejected_before_api(self):
+        payload = seedance.build_payload(self.base_args(), seedance.DEFAULT_MODEL)
+        payload["duration"] = 3
+        with self.assertRaisesRegex(seedance.SeedanceError, "4–15 秒整数"):
             seedance.validate_payload_model_compatibility(payload)
 
     def test_frame_and_reference_are_mutually_exclusive(self):

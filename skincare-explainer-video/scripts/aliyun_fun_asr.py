@@ -25,6 +25,16 @@ class AsrError(RuntimeError):
     pass
 
 
+def codex_home() -> Path:
+    configured = os.environ.get("CODEX_HOME", "").strip()
+    return Path(configured).expanduser() if configured else Path.home() / ".codex"
+
+
+def bundle_env_path() -> Path:
+    configured = os.environ.get("SKINCARE_VIDEO_ENV", "").strip()
+    return Path(configured).expanduser() if configured else codex_home() / "skincare-video-bundle.env"
+
+
 def load_env(path: Path) -> dict[str, str]:
     values: dict[str, str] = {}
     if not path.is_file():
@@ -215,7 +225,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--audio", type=Path)
     parser.add_argument("--context-file", type=Path)
     parser.add_argument("--output", type=Path)
-    parser.add_argument("--env-file", type=Path, default=Path(__file__).parents[1] / ".env")
+    parser.add_argument("--env-file", type=Path, default=bundle_env_path())
     parser.add_argument("--timeout", type=float, default=120.0)
     return parser
 
@@ -238,7 +248,7 @@ def main() -> int:
             )
             return 0 if config["api_key"] else 1
         if not config["api_key"]:
-            raise AsrError("缺少 DASHSCOPE_API_KEY；请配置在 Skill .env 或进程环境中")
+            raise AsrError(f"缺少 DASHSCOPE_API_KEY；请配置在 {args.env_file} 或进程环境中")
         if args.audio is None or args.output is None:
             raise AsrError("transcribe 必须提供 --audio 和 --output")
         duration, mime_type = validate_audio(args.audio)

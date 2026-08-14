@@ -42,7 +42,7 @@ photorealistic, realistic skin texture, 3D medical render, cinematic lighting, l
 
 ## 参考资产选择
 
-读取 [asset-catalog.md](asset-catalog.md) 和 [apimart-image-workflow.md](apimart-image-workflow.md)。接触表只用于浏览选型，不得传给生图模型。每次生图从 `assets/reference-frames/` 选择 1 张主参考单帧，必要时增加 1 张辅参考单帧，并把每个绝对路径作为 APIMart CLI 的 `--image` 参数真实上传；只把文件名写进 Prompt 不算引用。
+读取 [asset-catalog.md](asset-catalog.md) 和 [apimart-image-workflow.md](apimart-image-workflow.md)。每次生图从 `assets/reference-frames/` 选择 1 张主参考单帧，必要时增加 1 张辅参考单帧，并把每个绝对路径作为 APIMart CLI 的 `--image` 参数真实上传；只把文件名写进 Prompt 不算引用。
 
 原视频资产负责锁定线稿、人物比例、平涂色块、知识卡构图和信息密度；主题 Prompt 只负责替换内容。不要连续只引用上一张生成图。
 

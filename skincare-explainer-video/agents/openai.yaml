@@ -1,6 +1,6 @@
 interface:
   display_name: "护肤科普手绘视频"
   short_description: "将护肤知识制作成带复刻配音的手绘科普视频"
-  default_prompt: "使用 $skincare-explainer-video，把一个护肤成分或皮肤机制主题按旁白与语义分镜、豆包配音、阿里云 Fun-ASR 真实时间轴、APIMart 风格测试与分镜图片、Seedance 2.0 Mini 视频、字幕成片的顺序制作。"
+  default_prompt: "使用 $skincare-explainer-video，把一个护肤成分或皮肤机制主题按旁白与语义分镜、MiniMax Speech 2.8 HD 克隆音色配音、阿里云 Fun-ASR 真实时间轴、APIMart 风格测试与分镜图片、Seedance 2.0 Mini 视频、字幕成片的顺序制作。"
 policy:
   allow_implicit_invocation: true
